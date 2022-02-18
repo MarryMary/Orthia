@@ -1,0 +1,19 @@
+{
+    "name": "mary/orthia",
+    "description": "Template engine included ClearSky PHP framework",
+    "type": "package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "MarryMary",
+            "email": "92404990+MarryMary@users.noreply.github.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4":{
+            "Orthia\\": "Core/",
+            "UserFunction\\": "UserFunction"
+        }
+    }
+}

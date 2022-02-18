@@ -1,0 +1,16 @@
+<table border="1">
+    <tr>
+        <th>Engine Name</th>
+        <td>Orthia Template Engine {{ $version }}</td>
+    </tr>
+    <tr>
+        <th>Template Taste</th>
+        <td>{{ $mode }}</td>
+    </tr>
+    <tr>
+        @foreach($variable as $key => $value)
+            <th>Variable Viewer</th>
+            <td>{{ $key }} => {{ $value }}</td>
+        @endforeach
+    </tr>
+</table>
