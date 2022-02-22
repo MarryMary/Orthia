@@ -8,6 +8,11 @@
     <title>{{ $title }}</title>
 </head>
 <body>
+    {% comment %}
+        ここはORTHIAテンプレートのコメントです。
+        実際に生成されるHTMLには表示されません。
+    {% endcomment %}
+
     {% frame("navbar.html") %}
 
     {% csrf_token %}

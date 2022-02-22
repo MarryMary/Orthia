@@ -72,6 +72,11 @@ class OrthiaBlockFunction
         return True;
     }
 
+    public function comment()
+    {
+        return True;
+    }
+
     public function foreach(String $terms)
     {
         foreach($this->params as $key => $val){
@@ -215,5 +220,10 @@ class OrthiaBlockFunction
     public function endif(String $template)
     {
         return $template;
+    }
+
+    public function endcomment(String $dumped)
+    {
+        return "";
     }
 }
