@@ -1,20 +1,68 @@
 <!DOCTYPE html>
-<html lang="{{ lang }}">
+<html lang="{{ $lang }}">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>{{ $title }}</title>
 </head>
 <body>
-    <h1>{{ tu }}{{ hypn }}&nbsp;{{ ka }}</h1>
-    <p>{{ array_test.a }}</p>
-    {% if(tu == "hello") %}}
-        <p> Variable "$tu" is "hello" !</p>
-    {% elif(ka == "world!") %}
-        <p> Variable "$ka" is "world!" !</p>
-    {% else %}
-        <p> Don't known...</p>
+    {% frame("navbar.html") %}
+
+    {% csrf_token %}
+
+    {% debug %}
+
+    <h1>Variable Test</h1>
+    <hr>
+    <p>{{ $tu }}{{ $hypn }}&nbsp;{{ $ka }}</p>
+
+    <h1>for Test</h1>
+    <hr>
+    <h2>Setting：10</h2>
+    {% for($i = 0; $i > 10; $i++) %}
+        <p>Loop Test({{$i}} looped!)</p>
+    {% endfor %}
+
+    <h1>foreach test</h1>
+    <hr>
+    {% foreach($array_test as $key => $value) %}
+        <p>{{ $key }} => {{ $value }}</p>
+    {% endforeach %}
+
+    <h1>if test</h1>
+    <hr>
+    $tu == {{$tu}}
+    {% if($tu == "Hello") %}
+        <p>$tu variable is {{ $tu }}</p>
     {% endif %}
+
+    <h1>elif test</h1>
+    <hr>
+    {% if($tu == "ORTHIA") %}
+        <p>$tu variable is {{$tu}}</p>
+    {% elif($ka == "world!") %}
+        <p>$ka variable is {{$ka}}</p>
+    {% endif %}
+
+    <h1>elseif test</h1>
+    <hr>
+    {% if($tu == "ORTHIA") %}
+        <p>$tu variable is {{$tu}}</p>
+    {% elseif($title == "AnalyzerTest") %}
+        <p>$ka variable is {{$title}}</p>
+    {% endif %}
+
+    <h1>else test</h1>
+    <hr>
+    {% if($tu == "ORTHIA") %}
+        <p>$tu variable is {{$tu}}</p>
+    {% elseif($title == "ClearSky") %}
+        <p>$ka variable is {{$title}}</p>
+    {% else %}
+        <p>$lang variable is {{$lang}}</p>
+    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>

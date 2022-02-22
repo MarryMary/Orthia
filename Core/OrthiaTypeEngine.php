@@ -11,10 +11,12 @@ class OrthiaTypeEngine
 {
     private $template;
     private $params;
-    public function Entrance(String $template, Array $params)
+    private $parsemode = "phper";
+    public function Entrance(String $template, Array $params, String $mode = "phper")
     {
         $this->template = $template;
         $this->params = $params;
+        $this->parse_mode = $mode;
         $this->MainAnalyzer();
         return $this->template;
     }
@@ -26,12 +28,12 @@ class OrthiaTypeEngine
         $dumping = False;
         $dropping = False;
         $dumper = "";
-        $BuiltInBlockFunction = new OrthiaBlockFunction($this->params);
+        $BuiltInBlockFunction = new OrthiaBlockFunction($this->params, $this->parsemode);
         foreach($template as $key => $line){
             $is_code = False;
             $pattern = '/\{%.+?%\}/';
             preg_match_all($pattern, $line, $variables);
-            foreach($variables as $variable) {
+            foreach($variables[0] as $variable) {
                 $val = trim($variable);
                 $val = str_replace('{%', '', $val);
                 $val = str_replace('%}', '', $val);
@@ -41,14 +43,23 @@ class OrthiaTypeEngine
                     if(strpos($method_name,'end') !== false && substr($method_name, 0, 3)){
                         $dumping = False;
                         $dropping = False;
+                        $is_code = True;
                         $this->template .= $BuiltInBlockFunction->$method_name($dumper);
+                        $dumper = "";
                     }else {
                         $is_code = True;
-                        if ($this->JudgeBlockOrLine($method_name)) {
+                        if (!$this->JudgeBlockOrLine($method_name)) {
                             $pattern = "{\((.*)\)}";
                             preg_match($pattern, $val, $match);
-                            $result = $BuiltInBlockFunction->$method_name($match);
+                            if(isset($match[1])) {
+                                $result = $BuiltInBlockFunction->$method_name($match[1]);
+                            }else{
+                                $result = $BuiltInBlockFunction->$method_name($match);
+                            }
                             if (is_string($result)) {
+                                if(strpos($result,'ORTHIASIGNAL@') !== false){
+                                    return $this->template."##".$result;
+                                }
                                 $this->template .= $result;
                                 unset($template[$key]);
                             } else if (is_bool($result) && $result) {
@@ -59,10 +70,14 @@ class OrthiaTypeEngine
                                 $dropping = True;
                             }
                         } else {
-                            $BuiltInFunction = new OrthiaBuildInFunctions();
+                            $BuiltInFunction = new OrthiaBuildInFunctions($this->params, $this->parsemode);
                             $pattern = "{\((.*)\)}";
                             preg_match($pattern, $val, $match);
-                            $result = $BuiltInFunction->$method_name($match);
+                            if(isset($match[1])) {
+                                $result = $BuiltInFunction->$method_name($match[1]);
+                            }else{
+                                $result = $BuiltInFunction->$method_name($match);
+                            }
                             if (is_string($result)) {
                                 $this->template .= $result;
                             }
@@ -91,8 +106,8 @@ class OrthiaTypeEngine
     public function JudgeBlockOrLine(String $FunctionName)
     {
         if($this->BuiltInFunctionJudgement($FunctionName)){
-            $BuiltInFunction = new OrthiaBuildInFunctions();
-            $BuiltInBlockFunction = new OrthiaBlockFunction();
+            $BuiltInFunction = new OrthiaBuildInFunctions($this->params, $this->parsemode);
+            $BuiltInBlockFunction = new OrthiaBlockFunction($this->params, $this->parsemode);
             if(method_exists($BuiltInFunction, $FunctionName)){
                 return True;
             }else if(method_exists($BuiltInBlockFunction, $FunctionName)){
@@ -105,8 +120,8 @@ class OrthiaTypeEngine
 
     public function BuiltInFunctionJudgement(String $FunctionName)
     {
-        $BuiltInFunction = new OrthiaBuildInFunctions();
-        $BuiltInBlockFunction = new OrthiaBlockFunction();
+        $BuiltInFunction = new OrthiaBuildInFunctions($this->params, $this->parsemode);
+        $BuiltInBlockFunction = new OrthiaBlockFunction($this->params, $this->parsemode);
         if(method_exists($BuiltInFunction, $FunctionName) || method_exists($BuiltInBlockFunction, $FunctionName)){
             return True;
         }else{

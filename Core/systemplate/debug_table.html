@@ -1,16 +1,26 @@
+<h1>{{ $engine_name }} CONFIG VIEWER TABLE</h1>
+<hr>
 <table border="1">
     <tr>
         <th>Engine Name</th>
-        <td>Orthia Template Engine {{ $version }}</td>
+        <td>{{ $engine_name }}・{{ $version }}</td>
+    </tr>
+    <tr>
+        <th>Develop Type</th>
+        <td>{{ $dtype }}</td>
+    </tr>
+    <tr>
+        <th>Version CodeName</th>
+        <td>{{ $codename }}</td>
     </tr>
     <tr>
         <th>Template Taste</th>
         <td>{{ $mode }}</td>
     </tr>
-    <tr>
-        @foreach($variable as $key => $value)
-            <th>Variable Viewer</th>
-            <td>{{ $key }} => {{ $value }}</td>
-        @endforeach
-    </tr>
+    {% foreach($params as $key => $value) %}
+        <tr>
+            <th>Key: {{ $key }}</th>
+            <td>Value: {{ $value }}</td>
+        </tr>
+    {% endforeach %}
 </table>

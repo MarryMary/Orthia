@@ -20,7 +20,7 @@ class Analyzer
                 $this->param = $param;
                 $this->parsemode = $writer;
                 $analyzer = new OrthiaTypeEngine();
-                $this->template = $analyzer->Entrance($this->template);
+                $this->template = $analyzer->Entrance($this->template, $this->param, $this->parsemode);
                 $this->VariableInserter();
                 return $this->template;
             }else if(count($param) == 0){
@@ -28,7 +28,7 @@ class Analyzer
                 $this->param = array();
                 $this->parsemode = $writer;
                 $analyzer = new OrthiaTypeEngine();
-                $this->template = $analyzer->Entrance($this->template);
+                $this->template = $analyzer->Entrance($this->template, $this->param, $this->parsemode);
                 return $this->template;
             }else{
                 $this->template = $template;
@@ -45,9 +45,11 @@ class Analyzer
 
     private function VariableInserter()
     {
-        foreach($this->param as $key => $value) {
-            $$key = $value;
+        foreach($this->param as $CLSKORTHIAKEY => $CLSKORTHIAVAL) {
+            $$CLSKORTHIAKEY = $CLSKORTHIAVAL;
         }
+        unset($CLSKORTHIAKEY);
+        unset($CLSKORTHIAVAL);
         $prepared = "";
         $template = explode("\n", $this->template);
         $this->template = "";
@@ -68,9 +70,10 @@ class Analyzer
                             $line = str_replace($v, ${$val_trimed[0]}[$val_trimed[1]], $line);
                         }else{
                             if(is_array(${$val_trimed[0]})){
-                                foreach(${$val_trimed[0]} as $values){
-                                    $line = str_replace($v, $values, $line);
-                                }
+                                ob_start();
+                                var_dump(${$val_trimed[0]});
+                                $line = "<pre><code>".ob_get_contents()."</code></pre>";
+                                ob_end_clean();
                             }else{
                                 $line = str_replace($v, ${$val_trimed[0]}, $line);
                             }

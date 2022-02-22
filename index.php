@@ -13,4 +13,4 @@ $array_test = ["a" => "clear!", "b" => "clear!", "c" => "clear!", "d" => "clear!
 
 $template_string = file_get_contents($path);
 $ReaderInstance = new OrthiaGate();
-echo $ReaderInstance->CallAnalyzer($template_string, compact("lang", "tu", "hypn", "ka", "title", "array_test"), "pythonista");
+echo $ReaderInstance->CallAnalyzer($template_string, compact("lang", "tu", "hypn", "ka", "title", "array_test"), "phper");
