@@ -55,4 +55,41 @@ class OrthiaBuildInFunctions
         $template = file_get_contents(dirname(__FILE__)."/systemplate/debug_table.html");
         return $AnalyzerInstance->Main($template, compact("version", "engine_name", "dtype", "codename", "mode", "params"), False, "phper");
     }
+
+    public function ArrayAnalyzer(Array $array, String $keywords)
+    {
+        $parsemode = $this->parsemode;
+        if(strtolower($parsemode) == "phper"){
+            $exploded_keyword = explode("->", $keywords);
+        }else{
+            $exploded_keyword = explode(".", $keywords);
+        }
+        if(count($exploded_keyword) == 1 || count($exploded_keyword) == 0){
+            ob_start();
+            var_dump($array);
+            $line = "<pre><code>".ob_get_contents()."</code></pre>";
+            ob_end_clean();
+            return $line;
+        }else{
+            $based_array = $array;
+            $key = 1;
+            while(True){
+                if(array_key_exists($key, $exploded_keyword) && is_array($based_array)){
+                    $based_array = $based_array[$exploded_keyword[$key]];
+                    $key++;
+                }else{
+                    break;
+                }
+            }
+            if(is_array($based_array)){
+                ob_start();
+                var_dump($based_array);
+                $line = "<pre><code>".ob_get_contents()."</code></pre>";
+                ob_end_clean();
+                return $line;
+            }else{
+                return htmlspecialchars($based_array);
+            }
+        }
+    }
 }

@@ -60,14 +60,17 @@ class Analyzer
                 foreach($val as $v){
                     if($this->parsemode == "phper"){
                         $val_trimed = ltrim(trim(rtrim(ltrim(trim($v), "{{"), "}}")), "$");
+                        $val_untrimed = $val_trimed;
                         $val_trimed = explode("->", $val_trimed);
                     }else if($this->parsemode == "pythonista"){
                         $val_trimed = trim(rtrim(ltrim(trim($v), "{{"), "}}"));
+                        $val_untrimed = $val_trimed;
                         $val_trimed = explode(".", $val_trimed);
                     }
                     if(isset(${$val_trimed[0]}) && strpos($line, $v) !== false){
                         if(count($val_trimed) != 1){
-                            $line = str_replace($v, ${$val_trimed[0]}[$val_trimed[1]], $line);
+                            $FunctionInstance = new OrthiaBuildInFunctions($this->param, $this->parsemode);
+                            $line = $FunctionInstance->ArrayAnalyzer(${$val_trimed[0]}, $val_untrimed);
                         }else{
                             if(is_array(${$val_trimed[0]})){
                                 ob_start();
@@ -75,9 +78,11 @@ class Analyzer
                                 $line = "<pre><code>".ob_get_contents()."</code></pre>";
                                 ob_end_clean();
                             }else{
-                                $line = str_replace($v, ${$val_trimed[0]}, $line);
+                                $line = str_replace($v, htmlspecialchars(${$val_trimed[0]}), $line);
                             }
                         }
+                    }else{
+                        $line = "";
                     }
                 }
             }

@@ -28,6 +28,7 @@ class OrthiaTypeEngine
         $dumping = False;
         $dropping = False;
         $dumper = "";
+        $block_start_name = "";
         $BuiltInBlockFunction = new OrthiaBlockFunction($this->params, $this->parsemode);
         foreach($template as $key => $line){
             $is_code = False;
@@ -40,21 +41,26 @@ class OrthiaTypeEngine
                 $val = trim($val);
                 $method_name = substr($val, 0, strcspn($val,'('));
                 if ($this->BuiltInFunctionJudgement($method_name)) {
-                    if(strpos($method_name,'end') !== false && substr($method_name, 0, 3)){
+                    if(strpos($method_name,'end') !== false && substr($method_name, 0, 3) && strpos($method_name, $block_start_name) !== false){
                         $dumping = False;
                         $dropping = False;
                         $is_code = True;
                         $this->template .= $BuiltInBlockFunction->$method_name($dumper);
                         $dumper = "";
-                    }else {
-                        $is_code = True;
-                        if (!$this->JudgeBlockOrLine($method_name)) {
+                    }else if(!$dumping && !$dropping) {
+                        if($dumping || $dropping){
+                            $is_code = False;
+                        }else {
+                            $is_code = True;
+                        }
+                        if (!$this->JudgeBlockOrLine($method_name) && !$dumping && !$dropping) {
                             $pattern = "{\((.*)\)}";
                             preg_match($pattern, $val, $match);
-                            if(isset($match[1])) {
+                            if(isset($match[1]) && !$dumping && !$dropping) {
                                 $result = $BuiltInBlockFunction->$method_name($match[1]);
-                            }else{
-                                $result = $BuiltInBlockFunction->$method_name($match);
+                            }else if(!$dumping && !$dropping){
+                                echo $method_name;
+                                $result = $BuiltInBlockFunction->$method_name($match[0]);
                             }
                             if (is_string($result)) {
                                 if(strpos($result,'ORTHIASIGNAL@') !== false){
@@ -63,19 +69,21 @@ class OrthiaTypeEngine
                                 $this->template .= $result;
                                 unset($template[$key]);
                             } else if (is_bool($result) && $result) {
+                                $block_start_name = $method_name;
                                 $dumping = True;
                                 $dropping = False;
                             } else if (is_bool($result) && !$result) {
+                                $block_start_name = $method_name;
                                 $dumping = False;
                                 $dropping = True;
                             }
-                        } else {
+                        } else if($this->JudgeBlockOrLine($method_name) && !$dumping && !$dropping) {
                             $BuiltInFunction = new OrthiaBuildInFunctions($this->params, $this->parsemode);
                             $pattern = "{\((.*)\)}";
                             preg_match($pattern, $val, $match);
-                            if(isset($match[1])) {
+                            if(isset($match[1]) && !$dropping && !$dumping) {
                                 $result = $BuiltInFunction->$method_name($match[1]);
-                            }else{
+                            }else if(!$dropping && !$dumping){
                                 $result = $BuiltInFunction->$method_name($match);
                             }
                             if (is_string($result)) {
@@ -83,11 +91,19 @@ class OrthiaTypeEngine
                             }
                         }
                     }
-                } else if ($this->UserCreateFunctionJudgement($val)) {
-                    $is_code = True;
+                } else if ($this->UserCreateFunctionJudgement($val) && !$dropping && !$dumping) {
+                    if($dumping || $dropping){
+                        $is_code = False;
+                    }else {
+                        $is_code = True;
+                    }
                     //TODO
                 } else {
-                    $is_code = True;
+                    if($dumping || $dropping){
+                        $is_code = False;
+                    }else {
+                        $is_code = True;
+                    }
                     $result = eval($result);
                     $this->template .= $result;
                 }
