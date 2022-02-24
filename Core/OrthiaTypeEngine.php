@@ -27,6 +27,7 @@ class OrthiaTypeEngine
         $this->template = "";
         $dumping = False;
         $dropping = False;
+        $endcounter = 0;
         $dumper = "";
         $block_start_name = "";
         $BuiltInBlockFunction = new OrthiaBlockFunction($this->params, $this->parsemode);
@@ -41,26 +42,29 @@ class OrthiaTypeEngine
                 $val = trim($val);
                 $method_name = substr($val, 0, strcspn($val,'('));
                 if ($this->BuiltInFunctionJudgement($method_name)) {
-                    if(strpos($method_name,'end') !== false && substr($method_name, 0, 3) && strpos($method_name, $block_start_name) !== false){
-                        $dumping = False;
-                        $dropping = False;
-                        $is_code = True;
-                        $this->template .= $BuiltInBlockFunction->$method_name($dumper);
-                        $dumper = "";
-                    }else if(!$dumping && !$dropping) {
-                        if($dumping || $dropping){
-                            $is_code = False;
-                        }else {
+                    if(strpos($method_name,'end') !== false && substr($method_name, 0, 3) && $method_name == "end".trim($block_start_name)){
+                        if($endcounter == 0){
+                            $dumping = False;
+                            $dropping = False;
                             $is_code = True;
+                            $this->template .= $BuiltInBlockFunction->$method_name($dumper);
+                            $dumper = "";
+                        }else{
+                            $endcounter--;
                         }
-                        if (!$this->JudgeBlockOrLine($method_name) && !$dumping && !$dropping) {
+                    }else if(!$dumping && !$dropping) {
+                        $is_code = True;
+                        if (!$this->JudgeBlockOrLine($method_name)) {
                             $pattern = "{\((.*)\)}";
                             preg_match($pattern, $val, $match);
-                            if(isset($match[1]) && !$dumping && !$dropping) {
+                            if(isset($match[1])) {
                                 $result = $BuiltInBlockFunction->$method_name($match[1]);
                             }else if(!$dumping && !$dropping){
-                                echo $method_name;
-                                $result = $BuiltInBlockFunction->$method_name($match[0]);
+                                if(array_key_exists(0, $match)){
+                                    $result = $BuiltInBlockFunction->$method_name($match[0]);
+                                }else{
+                                    $result = $BuiltInBlockFunction->$method_name();
+                                }
                             }
                             if (is_string($result)) {
                                 if(strpos($result,'ORTHIASIGNAL@') !== false){
@@ -77,7 +81,7 @@ class OrthiaTypeEngine
                                 $dumping = False;
                                 $dropping = True;
                             }
-                        } else if($this->JudgeBlockOrLine($method_name) && !$dumping && !$dropping) {
+                        } else if($this->JudgeBlockOrLine($method_name)) {
                             $BuiltInFunction = new OrthiaBuildInFunctions($this->params, $this->parsemode);
                             $pattern = "{\((.*)\)}";
                             preg_match($pattern, $val, $match);
@@ -87,30 +91,38 @@ class OrthiaTypeEngine
                                 $result = $BuiltInFunction->$method_name($match);
                             }
                             if (is_string($result)) {
-                                $this->template .= $result;
+                                $this->template .= $result."\n";
                             }
+                        }
+                    }else{
+                        if(trim($method_name) == trim($block_start_name)){
+                            $endcounter ++;
                         }
                     }
                 } else if ($this->UserCreateFunctionJudgement($val) && !$dropping && !$dumping) {
-                    if($dumping || $dropping){
-                        $is_code = False;
-                    }else {
-                        $is_code = True;
+                    $is_code = True;
+                    $UserFunction = new UserFunction();
+                    $pattern = "{\((.*)\)}";
+                    preg_match($pattern, $val, $match);
+                    if(isset($match[1]) && !$dropping && !$dumping) {
+                        $result = $UserFunction->$method_name($match[1]);
+                    }else if(!$dropping && !$dumping){
+                        $result = $UserFunction->$method_name($match);
                     }
-                    //TODO
+                    $this->template .= $line;
                 } else {
                     if($dumping || $dropping){
                         $is_code = False;
                     }else {
                         $is_code = True;
                     }
-                    $result = eval($result);
-                    $this->template .= $result;
+                    $result = eval("return ".$val.";");
+                    $this->template .= $result."\n";
                 }
             }
             if(!$is_code){
                 if($dumping){
-                    $dumper .= $line;
+                    $dumper .= $line."\n";
                 }
                 if(!$dropping && !$dumping) {
                     $this->template .= $line;
@@ -129,8 +141,8 @@ class OrthiaTypeEngine
             }else if(method_exists($BuiltInBlockFunction, $FunctionName)){
                 return False;
             }
-        }else if($this->UserCreateFunctionJudgement($FunctionName)){
-            //TODO
+        }else{
+            return False;
         }
     }
 

@@ -31,15 +31,6 @@ class OrthiaBuildInFunctions
         return "ORTHIASIGNAL@STOP";
     }
 
-    public function frame($path)
-    {
-        $path = trim($path, '"');
-        $path = trim($path, "'");
-        $AnalyzerInstance = new Analyzer();
-        $template = file_get_contents(dirname(__FILE__)."/../Template/".trim(trim(trim($path), "/")), "\\");
-        return $AnalyzerInstance->Main($template, $this->params, False, $this->parsemode);
-    }
-
     public function debug()
     {
         $config_json = file_get_contents(dirname(__FILE__)."/config.json");
@@ -90,6 +81,28 @@ class OrthiaBuildInFunctions
             }else{
                 return htmlspecialchars($based_array);
             }
+        }
+    }
+
+    public function paste_here(String $parts_name)
+    {
+        if(array_key_exists("[ORTHIABLOCKOBJECT]".trim(trim(trim($parts_name), "'"), '"'), $this->params)){
+            return $this->params["[ORTHIABLOCKOBJECT]".$parts_name];
+        }else{
+            return "";
+        }
+    }
+
+    public function convey(String $path)
+    {
+        $path = dirname(__FILE__)."/../Template/".trim(trim(trim(trim(trim($path), "/"), "\\"), "'"), '"');
+        if(file_exists($path)){
+            $template = file_get_contents($path);
+            $AnalyzerInstance = new Analyzer();
+            $template = $AnalyzerInstance->Main($template, $this->params, False, "phper");
+            return $template;
+        }else{
+            return "";
         }
     }
 }
