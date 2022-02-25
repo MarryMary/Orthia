@@ -29,10 +29,10 @@ class OrthiaBlockFunction
         }
 
         if(eval("return ".$terms.";")){
-            return True;
+            return [True, "if"];
         }else{
             $this->if_pathed = True;
-            return False;
+            return [False, "if"];
         }
     }
 
@@ -43,13 +43,13 @@ class OrthiaBlockFunction
         }
 
         if(eval("return ".$terms.";") && $this->if_pathed){
-            return True;
+            return [True, "if"];
         }else{
             if($this->if_pathed){
-                return False;
+                return [False, "if"];
             }else {
                 $this->elif_pathed = True;
-                return False;
+                return [False, "if"];
             }
         }
     }
@@ -65,10 +65,10 @@ class OrthiaBlockFunction
             $$ORTHIAkey = $ORTHIAval;
         }
 
-        if($this->if_pathed && $this->elif_pathed){
-            return True;
+        if($this->if_pathed || $this->elif_pathed){
+            return [False, "if"];
         }else{
-            return False;
+            return [True, "if"];
         }
     }
 
@@ -233,7 +233,10 @@ class OrthiaBlockFunction
 
     public function endif(String $template)
     {
-        return $template;
+        $params = $this->params;
+        $AnalyzerInstance = new Analyzer();
+        $returned = $AnalyzerInstance->Main($template, $params, False, $this->parsemode);
+        return $returned;
     }
 
     public function endcomment(String $dumped)

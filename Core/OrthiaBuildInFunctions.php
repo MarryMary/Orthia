@@ -105,4 +105,22 @@ class OrthiaBuildInFunctions
             return "";
         }
     }
+
+    public function OL(String $oneLineCode)
+    {
+        $template = "";
+        $onelineparse = explode(";", $oneLineCode);
+        foreach($onelineparse as $code){
+            $codeparsed = explode("|", $code);
+            if(count($codeparsed) == 2){
+                $template .= "{% ".trim($codeparsed[0])." %}\n";
+                $template .= trim($codeparsed[1])."\n";
+            }else if(count($codeparsed) == 1 && strpos($codeparsed[0],'end') !== false){
+                $template .= "{% ".trim($codeparsed[0])." %}\n";
+            }
+        }
+        $AnalyzerInstance = new Analyzer();
+        $template = $AnalyzerInstance->Main($template, $this->params, False, "phper");
+        return $template;
+    }
 }
