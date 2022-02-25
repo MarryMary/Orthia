@@ -257,7 +257,7 @@ class OrthiaBlockFunction
     {
         $param = $this->params;
         $params = array_merge($param, $this->copy_parts);
-        $path = dirname(__FILE__)."/../../../".trim(trim(trim(trim(trim($path), "/"), "\\"), "'"), '"');
+        $path = dirname(__FILE__)."/../../../../".trim(trim(trim(trim(trim($path), "/"), "\\"), "'"), '"');
         if(file_exists($path)){
             $frame_template = file_get_contents($path);
             $AnalyzerInstance = new Analyzer();
