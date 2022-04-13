@@ -9,7 +9,9 @@
             "email": "92404990+MarryMary@users.noreply.github.com"
         }
     ],
-    "require": {},
+    "require": {
+      "ext-json": "*"
+    },
     "autoload": {
         "psr-4":{
             "Orthia\\": "Core/",
